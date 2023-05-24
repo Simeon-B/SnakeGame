@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Generale -->
+    <dimen name="button_size">24sp</dimen>
+    <dimen name="title_size">24sp</dimen>
+    <!-- main -->
+    <dimen name="main_padding_size">18dp</dimen>
+    <dimen name="main_composent_space">10dp</dimen>
+    <dimen name="main_button_min_with">220dp</dimen>
+    <dimen name="main_button_min_height">60dp</dimen>
+    <!-- main land -->
+    <dimen name="main_land_half_size">350dp</dimen>
+    <!-- game -->
+    <dimen name="game_menu_button_with">140dp</dimen>
+    <dimen name="game_question_with">550dp</dimen>
+    <dimen name="game_bt_txt_size">20sp</dimen>
+</resources>

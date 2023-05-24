@@ -1,3 +1,26 @@
 <resources>
+    <!-- Syystème -->
     <string name="app_name">SnakeGame</string>
+    <string name="app_title">Snake game</string>
+    <string name="player_name">Player name</string>
+
+    <!-- Ecran principale -->
+    <string name="main_add_player">Add a player</string>
+    <string name="main_set_gamemod">Set game mod</string>
+    <string name="main_play">Play</string>
+    <string name="main_play_edit_label">Add a player</string>
+    <string name="main_add_player_OK">OK</string>
+    <string name="main_add_player_Cancel">Cancel</string>
+    <string name="main_reset">Reset</string>
+    <string-array name="gamemode_options">
+        <item>Sandbox</item>
+        <item>Standard</item>
+        <item>Hardcore</item>
+    </string-array>
+
+    <!-- Ecran de jeu -->
+    <string name="game_title">Snake game</string>
+    <string name="game_replay">Replay</string>
+    <string name="game_replay_stop">STOP</string>
+    <string name="game_menu">Menu</string>
 </resources>

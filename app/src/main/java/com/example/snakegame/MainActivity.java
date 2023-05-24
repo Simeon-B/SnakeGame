@@ -1,220 +1,242 @@
 package com.example.snakegame;
 
-// importation des outils
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-
-import android.os.Bundle;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
 
 import android.content.Context;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.view.ViewGroup;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.RelativeLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
+
+import com.google.android.material.textfield.TextInputEditText;
 
 /**
- * Mon application
- *
+ * la partie pour gèrer l'utilisation de l'application, des utilisateur et résultat
  */
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity {
 
-    int numRows = 10;
-    int numColumns = 20;
-    int SHposX = 4;
-    int SHposY = 0;
-    int SHorientation = 0;
-    int WMposX = 6;
-    int WMposY = 9;
+    // déclarer les varaibles d'objet
+    private Button btPlay;
+    private Button btAddPlayer;
+    private RelativeLayout rlAddPlayer;
+    private Button btOKAddPlayer;
+    private Button btCancelAddPlayer;
+    private TextInputEditText txtuserInput;
+    private TextView txtVJoueur1;
+    private TextView txtVJoueur2;
+    private Button btSetGamemod;
+    private RelativeLayout rlSetGamemod;
+    private Button btOKSetGamemod;
+    private Button btCancelSetGamemod;
+    private Spinner spinGamemod;
+    private TextView txtVGamemod;
+    private Button btReset;
 
-    private SensorManager sensorManager;
-    private Sensor gravitySensor;
-    private TextView orientationTextView;
-    private ImageView snakeHaedView;
-    private ImageView whiteMousView;
-    private TableLayout tableLayout;
-    private TextView gameOver;
-
-    // variable pour jouer
-    boolean isGameOver = false;
-
-
+    /**
+     * à la première création du programme
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        orientationTextView = findViewById(R.id.orientationTextView);
+        // affecter l'objet à la variable aproprier
+        btPlay = findViewById(R.id.main_button_play);
+        btAddPlayer = findViewById(R.id.main_button_add_player);
+        rlAddPlayer = findViewById(R.id.main_saisie_utilisateur_layaout);
+        btOKAddPlayer = findViewById(R.id.main_button_add_p_OK);
+        btCancelAddPlayer = findViewById(R.id.main_button_add_p_Cancel);
+        txtuserInput = findViewById(R.id.enter_user);
+        txtVJoueur1 = findViewById(R.id.main_player1);
+        txtVJoueur2 = findViewById(R.id.main_player2);
+        btSetGamemod = findViewById(R.id.main_button_set_gamemod);
+        rlSetGamemod = findViewById(R.id.main_saisie_gamemod);
+        btOKSetGamemod = findViewById(R.id.main_button_gamemod_OK);
+        btCancelSetGamemod = findViewById(R.id.main_button_gamemod_Cancel);
+        spinGamemod = findViewById(R.id.set_gamemode);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.gamemode_options, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinGamemod.setAdapter(adapter);
 
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        gravitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
+        txtVGamemod = findViewById(R.id.main_gamemod);
+        btReset = findViewById(R.id.main_button_reset);
 
-        /* ************ ************ ************ ************ ************
-          Créer le plateau de jeux et le serpent
-         */
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int screenHeight = displayMetrics.heightPixels;
-        int screenWidth = displayMetrics.widthPixels;
-        int cellHeight = (int) ((screenHeight - 50) * 0.1);
-        int cellWidth = (int) ((screenWidth + 10) * 0.05);
+        newStart();
+    }
 
-        tableLayout = findViewById(R.id.tableView);
-        gameOver = findViewById(R.id.gameOver);
-        gameOver.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30);
+    // Mes fonctions |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-        // définir l'image de la tête du serpent
-        snakeHaedView = new ImageView(this);
-        snakeHaedView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-        snakeHaedView.setImageResource(R.drawable.snake_head);
+    // les variables globales
+    private int numberUsersEntered = 0;
+    private String player1 = "";
+    private String player2 = "";
+    private String gamemod = "";
 
-        // définir l'image de la souris
-        whiteMousView = new ImageView(this);
-        whiteMousView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-        whiteMousView.setImageResource(R.drawable.white_mous);
-
-        // Création du tableau de jeux ave la tête du serpent
-        for (int i = 0; i < numRows; i++) {
-            TableRow tableRow = new TableRow(this);
-            tableRow.setLayoutParams(new TableRow.LayoutParams(
-                    TableRow.LayoutParams.MATCH_PARENT,
-                    TableRow.LayoutParams.WRAP_CONTENT));
-
-            for (int j = 0; j < numColumns; j++) {
-                FrameLayout frameLayout = new FrameLayout(this);
-                frameLayout.setLayoutParams(new TableRow.LayoutParams(cellWidth, cellHeight));
-
-                // Créer et affecter une ID unique en combinant i et j
-                frameLayout.setTag(i + "-" + j);
-
-                if ((i % 2 == 0 && j % 2 == 0) || (i % 2 != 0 && j % 2 != 0)) {
-                    frameLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.lightgreen));
-                } else {
-                    frameLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.darkgreen));
-                }
-
-                if (i == SHposX && j == SHposY) {
-                    // Ajouter l'ImageView au conteneur
-                    frameLayout.addView(snakeHaedView);
-                }
-
-                if (i == WMposX && j == WMposY) {
-                    // Ajouter l'ImageView au conteneur
-                    frameLayout.addView(whiteMousView);
-                }
-
-                // Ajouter les cellules (frameLayout) aux lignes
-                tableRow.addView(frameLayout);
-            }
-
-            // Ajouter les lignes au tableau
-            tableLayout.addView(tableRow);
-        }
+    /**
+     * remet les valeurs initial
+     */
+    private void newStart(){
+        btAddPlayer.setEnabled(false);
+        btSetGamemod.setEnabled(true);
+        btPlay.setEnabled(false);
+        btReset.setEnabled(false);
+        rlAddPlayer.setVisibility(View.INVISIBLE);
+        rlSetGamemod.setVisibility(View.INVISIBLE);
+        txtVJoueur1.setText("");
+        txtVJoueur2.setText("");
+        txtVGamemod.setText("");
+        numberUsersEntered = 0;
+        player1 = "";
+        player2 = "";
     }
 
     /**
-     * regarde les changements du capteur
+     * Quand on valide l'ajout d'un joueur
+     * on teste la saisie et on mets du text alternativ si il n'y en as pas
      */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        sensorManager.registerListener(this, gravitySensor, SensorManager.SENSOR_DELAY_NORMAL);
-    }
+    private void okAddPlayerOpen(){
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        sensorManager.unregisterListener(this);
-    }
-
-    /**
-     * Regarde si les capteurs change et change en même temps les affichages
-     *
-     * @param event the {@link android.hardware.SensorEvent SensorEvent}.
-     */
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-
-        if(!isGameOver) {
-            // Mise à jour des valeurs de x, y et z
-            int xValue = (int) (event.values[0] * 10);
-            int yValue = (int) (event.values[1] * 10);
-            int zValue = (int) (event.values[2] * 10);
-
-            // Mise à jour de l'affichage dans le TextView
-            orientationTextView.setText("x : " + xValue + "%\ny : " + yValue + "%\nz : " + zValue + "%");
-
-        /* ************ ************ ************ ************ ************
-          Controle du serpant
-         */
-
-            // jouer
-            if (ifGo(yValue, xValue)) {
-
-                // Definir la nouvelle position posX et posY
-                go(yValue, xValue);
-
-                // Supprimer l'ImageView du conteneur parent
-                ViewGroup parent = (ViewGroup) snakeHaedView.getParent();
-                if (parent != null) {
-                    parent.removeView(snakeHaedView);
-                }
-
-                if (ifNoCrash()) {
-                    // Obtenir le conteneur à la nouvelle position et i placer l'image
-                    FrameLayout frameLayout = (FrameLayout) tableLayout.findViewWithTag(SHposX + "-" + SHposY);
-                    frameLayout.addView(snakeHaedView);
-                    snakeHaedView.setRotation(SHorientation);
-                } else {
-                    isGameOver = true;
-                    gameOver.setText("Game Over");
-                }
+        //vérifier la saisie et mettre un text alternatif si c'est vide
+        if (numberUsersEntered == 0) {
+            player1 = txtuserInput.getText().toString();
+            if (player1.matches("")) {
+                player1 = "???";
             }
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Ne fait rien pour le moment
-    }
-
-    private boolean ifGo(int yValue, int xValue) {
-        return (yValue > 10 || yValue < -10 || xValue > 10 || xValue < -10 );
-    }
-
-    private void go(int yValue, int xValue){
-        // Récupèrer les valeurs absolut
-        int absYValue = Math.abs(yValue);
-        int absXValue = Math.abs(xValue);
-
-        // Définir la nouvelle position posX et posY
-        if (absYValue > absXValue) {
-            if (yValue > 10) {
-                SHposY++;
-                SHorientation = 0;
-            } else if (yValue < -10) {
-                SHposY--;
-                SHorientation = 180;
+            txtVJoueur1.setText(player1);
+            numberUsersEntered = 1;
+        } else if (numberUsersEntered == 1) {
+            player2 = txtuserInput.getText().toString();
+            if (player2.matches("")) {
+                player2 = "???";
             }
+            txtVJoueur2.setText(player2);
+            numberUsersEntered = 2;
+            btAddPlayer.setEnabled(false);
+            btPlay.setEnabled(true);
         } else {
-            if (xValue > 10) {
-                SHposX++;
-                SHorientation = 90;
-            } else if (xValue < -10) {
-                SHposX--;
-                SHorientation = 270;
-            }
+            txtVJoueur1.setText("Error");
+            txtVJoueur2.setText("Error");
         }
+        // cacher le clavier après la saisie
+        InputMethodManager imm = (InputMethodManager)getSystemService(
+                Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(txtuserInput.getWindowToken(), 0);
+
+        txtuserInput.setText("");
+        rlAddPlayer.setVisibility(View.INVISIBLE);
     }
 
-    private boolean ifNoCrash(){
-        return (SHposX >= 0 && SHposX < numRows && SHposY >= 0 && SHposY < numColumns);
+    private void oksetGamemode(){
+        gamemod = spinGamemod.getItemAtPosition(0).toString();
+        txtVGamemod.setText(gamemod);
+        rlSetGamemod.setVisibility(View.INVISIBLE);
+        btPlay.setEnabled(true);
+    }
+
+    /**
+     * Les préparation et ouverture d'une partie à jouer
+     */
+    private void startGame(){
+        // ouvrir et transferer le résultat sur le résultat
+        // préparer le transfère de données
+        Intent ActivityIntent = new Intent(MainActivity.this, gameActivity.class);
+        // afecter les variable et les valeurs au transfèr
+        //ActivityIntent.putExtra("Player1", player1);
+        //ActivityIntent.putExtra("Player2", player2);
+        ActivityIntent.putExtra("Gamemod", gamemod);
+        // Ouvrir l'activité de destination
+        startActivity(ActivityIntent);
+    }
+
+    // |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    // S'éxecute l'or de louverture/l'affichage de l'application |||||||||||||||||||||||||||||||||||
+    @Override
+    protected void onStart(){
+        super.onStart();
+        newStart();
+        // Ici on y place les écoute d'évènements (Listener)
+
+
+        //   ...........  quand je clic sur le bt jouer
+        btPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startGame();
+            }
+        });
+
+        //   ...........  quand je clic sur le bt ajouter un joueur
+        btAddPlayer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // ajouter un joueur
+                rlAddPlayer.setVisibility(View.VISIBLE);
+            }
+        });
+
+        //   ...........  quand je clic sur le bt OK ajouter
+        btOKAddPlayer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // ok
+                okAddPlayerOpen();
+            }
+        });
+
+        //   ...........  quand je clic sur le bt cancel ajouter
+        btCancelAddPlayer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // annuler
+                InputMethodManager imm = (InputMethodManager)getSystemService(
+                        Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(txtuserInput.getWindowToken(), 0);
+                txtuserInput.setText("");
+                rlAddPlayer.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        //   ...........  quand je clic sur le bt définir le mode de jeux
+        btSetGamemod.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // définir le mod de jeux
+                rlSetGamemod.setVisibility(View.VISIBLE);
+            }
+        });
+
+        //   ...........  quand je clic sur le bt OK gamemod
+        btOKSetGamemod.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // ok
+                oksetGamemode();
+            }
+        });
+
+        //   ...........  quand je clic sur le bt cancel gamemod
+        btCancelSetGamemod.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // annuler
+                // ...
+                rlSetGamemod.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        //   ...........  quand je clic sur le bt reset
+        btReset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // reset
+                newStart();
+            }
+        });
     }
 }

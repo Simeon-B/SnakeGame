@@ -1,32 +1,310 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/constraintLayout"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/colorBackGround"
     tools:context=".MainActivity">
 
-    <TableLayout
-        android:id="@+id/tableView"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/main_toolbar_base"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </TableLayout>
+        android:layout_height="wrap_content"
+        android:background="@color/darkgreen"
+        app:layout_constraintTop_toTopOf="parent">
 
+        <!-- ?attr/actionBarSize = hauteur par deffaut de android -->
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/main_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:elevation="5dp"
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            android:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Titre -->
     <TextView
-        android:id="@+id/orientationTextView"
+        android:id="@+id/main_tittle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/main_composent_space"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="@dimen/main_padding_size"
+        android:text="@string/app_title"
+        android:textSize="@dimen/title_size"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/main_toolbar_base"
+        tools:layout_editor_absoluteX="10dp" />
+
+    <!-- Ajouter un joueur bouton -->
+    <Button
+        android:id="@+id/main_button_add_player"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="@string/main_add_player"
+        android:textSize="@dimen/button_size"
+        android:minWidth="@dimen/main_button_min_with"
+        android:minHeight="@dimen/main_button_min_height"
+        android:layout_marginTop="60dp"
+        android:layout_marginBottom="@dimen/main_composent_space"
+        android:layout_marginHorizontal="@dimen/main_composent_space"
+        app:layout_constraintTop_toBottomOf="@+id/main_tittle"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
+    </Button>
 
+    <!-- Afficher joueuer 1 -->
     <TextView
-        android:id="@+id/gameOver"
+        android:id="@+id/main_player1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/main_composent_space"
+        android:background="@color/colorBackGround"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="@dimen/main_padding_size"
+        android:text=""
+        android:textSize="@dimen/title_size"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@+id/main_button_add_player"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Afficher joueuer 2 -->
+    <TextView
+        android:id="@+id/main_player2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/main_composent_space"
+        android:background="@color/colorBackGround"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="@dimen/main_padding_size"
+        android:text=""
+        android:textSize="@dimen/title_size"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@+id/main_player1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Définir le game mode bouton -->
+    <Button
+        android:id="@+id/main_button_set_gamemod"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="@string/main_set_gamemod"
+        android:textSize="@dimen/button_size"
+        android:minWidth="@dimen/main_button_min_with"
+        android:minHeight="@dimen/main_button_min_height"
+        android:layout_margin="@dimen/main_composent_space"
+        app:layout_constraintTop_toBottomOf="@+id/main_player2"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+    </Button>
+
+    <!-- Afficher joueuer 2 -->
+    <TextView
+        android:id="@+id/main_gamemod"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/main_composent_space"
+        android:background="@color/colorBackGround"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="@dimen/main_padding_size"
+        android:text=""
+        android:textSize="@dimen/title_size"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@+id/main_button_set_gamemod"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Bouton jouer -->
+    <Button
+        android:id="@+id/main_button_play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/main_play"
+        android:textSize="@dimen/button_size"
+        android:minWidth="@dimen/main_button_min_with"
+        android:minHeight="@dimen/main_button_min_height"
+        android:layout_margin="@dimen/main_composent_space"
+        android:layout_gravity="center"
+        app:layout_constraintTop_toBottomOf="@+id/main_gamemod"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+    </Button>
+
+    <!-- Bouton reset -->
+    <Button
+        android:id="@+id/main_button_reset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/main_reset"
+        android:textSize="@dimen/button_size"
+        android:minWidth="@dimen/main_button_min_with"
+        android:minHeight="@dimen/main_button_min_height"
+        android:layout_margin="@dimen/main_composent_space"
+        android:layout_gravity="center"
+        app:layout_constraintTop_toBottomOf="@+id/main_button_play"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+    </Button>
+
+    <!-- Saisie d'utilisateur -->
+    <RelativeLayout
+        android:id="@+id/main_saisie_utilisateur_layaout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:orientation="vertical"
+        android:elevation="5dp"
+        android:background="@color/colorBackGround"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent">
+
+
+        <!-- Champ de saisie d'utilisateur -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/enter_user_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="@dimen/main_composent_space"
+            android:background="@color/colorBackGround"
+            android:elevation="5dp"
+            android:gravity="center"
+            android:hint="@string/main_play_edit_label"
+            android:minWidth="300dp"
+            android:orientation="horizontal"
+            android:padding="@dimen/main_padding_size">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/enter_user"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Bouton ajouter le joueur -->
+        <Button
+            android:id="@+id/main_button_add_p_OK"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/enter_user_layout"
+            android:layout_alignParentStart="true"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginVertical="170dp"
+            android:minWidth="140dp"
+            android:minHeight="@dimen/main_button_min_height"
+            android:text="@string/main_add_player_OK"
+            android:textSize="@dimen/button_size">
+
+        </Button>
+
+        <!-- Annuler -->
+        <Button
+            android:id="@+id/main_button_add_p_Cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="140dp"
+            android:minHeight="@dimen/main_button_min_height"
+            android:text="@string/main_add_player_Cancel"
+            android:layout_marginVertical="170dp"
+            android:layout_marginHorizontal="20dp"
+            android:textSize="@dimen/button_size"
+            android:layout_alignTop="@id/enter_user_layout"
+            android:layout_alignParentEnd="true">
+        </Button>
+    </RelativeLayout>
+
+    <!-- Saisie du mod de jeux -->
+    <RelativeLayout
+        android:id="@+id/main_saisie_gamemod"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:orientation="vertical"
+        android:elevation="5dp"
+        android:background="@color/colorBackGround"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+
+        <!-- Champ de saisie d'utilisateur -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/enter_gamemode"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="@dimen/main_composent_space"
+            android:background="@color/colorBackGround"
+            android:elevation="5dp"
+            android:gravity="center"
+            android:hint="@string/main_play_edit_label"
+            android:minWidth="300dp"
+            android:orientation="horizontal"
+            android:padding="@dimen/main_padding_size">
+
+            <!-- Champ de sélection de gamemode -->
+            <Spinner
+                android:id="@+id/set_gamemode"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="-20dp"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Bouton ajouter le joueur -->
+        <Button
+            android:id="@+id/main_button_gamemod_OK"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/enter_gamemode"
+            android:layout_alignParentStart="true"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginVertical="170dp"
+            android:minWidth="140dp"
+            android:minHeight="@dimen/main_button_min_height"
+            android:text="@string/main_add_player_OK"
+            android:textSize="@dimen/button_size">
+
+        </Button>
+
+        <!-- Annuler -->
+        <Button
+            android:id="@+id/main_button_gamemod_Cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="140dp"
+            android:minHeight="@dimen/main_button_min_height"
+            android:text="@string/main_add_player_Cancel"
+            android:layout_marginVertical="170dp"
+            android:layout_marginHorizontal="20dp"
+            android:textSize="@dimen/button_size"
+            android:layout_alignTop="@id/enter_gamemode"
+            android:layout_alignParentEnd="true">
+        </Button>
+    </RelativeLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

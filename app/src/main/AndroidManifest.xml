@@ -13,9 +13,13 @@
         android:theme="@style/Theme.SnakeGame"
         tools:targetApi="31">
         <activity
+            android:name=".gameActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"/>
+        <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:screenOrientation="landscape">
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
