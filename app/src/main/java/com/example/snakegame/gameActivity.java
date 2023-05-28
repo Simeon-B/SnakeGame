@@ -1,7 +1,6 @@
 package com.example.snakegame;
 
 // importation des outils
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -35,12 +34,11 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
     private Sensor gravitySensor;
     private TextView orientationTextView;
     private ImageView snakeHaedView;
-    private ImageView whiteMousView;
-    private ImageView brownMousView;
+    private ImageView MousView;
     private TableLayout tableLayout;
     private TextView gameOver;
 
-    ArrayList<int[]> mousePositionsType = new ArrayList<>();
+    ArrayList<int[]> mousePositionsAndType = new ArrayList<>();
 
     /**
      * à la première création du programme
@@ -71,12 +69,8 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
         snakeHaedView.setImageResource(R.drawable.snake_head);
 
         // définir les images de souris
-        whiteMousView = new ImageView(this);
-        whiteMousView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-        whiteMousView.setImageResource(R.drawable.white_mous);
-        brownMousView = new ImageView(this);
-        brownMousView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-        brownMousView.setImageResource(R.drawable.brown_mous);
+        MousView = new ImageView(this);
+        MousView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
 
         // définir la tail de l'écran
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -88,9 +82,7 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
         newStart();
         generateGameStructure(screenHeight, screenWidth);
 
-        int[] tes2Sourie = mousePositionsType.get(0);
-        int[] testSourie = {3, 5, 1};
-        setMousWithPos(testSourie);
+        playGame.setMousWithPos(mousePositionsAndType.get(0), tableLayout, MousView);
     }
 
     // les variables globales ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -104,6 +96,7 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
     int SHorientation = 0;
     int WMposX = 6;
     int WMposY = 9;
+    ArrayList<int[]> limitMousPosAndType = new ArrayList<>();
 
     // variable pour jouer
     boolean isGameOver = false;
@@ -120,9 +113,16 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
         SHorientation = 0;
         WMposX = 6;
         WMposY = 9;
-        mousePositionsType.clear();
-        int[] initPosition = {6,9,0};
-        mousePositionsType.add(initPosition);
+        limitMousPosAndType.add(new int[]{0, numRows}); // X min max
+        limitMousPosAndType.add(new int[]{0, numColumns}); // Y min max
+        limitMousPosAndType.add(new int[]{0, 1}); // moustype min max
+        mousePositionsAndType.clear();
+        ArrayList<int[]> limitInitMousPosAnsType = new ArrayList<>();
+        limitInitMousPosAnsType.add(new int[]{2, 8}); // X min max
+        limitInitMousPosAnsType.add(new int[]{3, 17}); // Y min max
+        limitInitMousPosAnsType.add(new int[]{0, 1}); // moustype min max
+        int[] initPosition = playGame.RandomMousPosition(limitInitMousPosAnsType);
+        mousePositionsAndType.add(initPosition);
     }
 
     /**
@@ -157,15 +157,6 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
                 if (i == SHposX && j == SHposY) {
                     // Ajouter l'ImageView au conteneur
                     frameLayout.addView(snakeHaedView);
-                }
-
-                if (i == mousePositionsType.get(0)[0] && j == mousePositionsType.get(0)[1]) {
-                    // Ajouter l'ImageView au conteneur
-                    if (mousePositionsType.get(0)[2] == 0){
-                        frameLayout.addView(whiteMousView);
-                    } else {
-                        frameLayout.addView(whiteMousView);
-                    }
                 }
 
                 // Ajouter les cellules (frameLayout) aux lignes
@@ -230,9 +221,9 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
                     frameLayout.addView(snakeHaedView);
 
                     // vérifier si le serpent bouffe la souri
-                    ViewGroup WMparent = (ViewGroup) whiteMousView.getParent();
+                    ViewGroup WMparent = (ViewGroup) MousView.getParent();
                     if (Objects.equals(SHparent.getTag(), WMparent.getTag()) && WMparent != null) {
-                        WMparent.removeView(whiteMousView);
+                        WMparent.removeView(MousView);
                     }
                 } else {
                     isGameOver = true;
@@ -283,20 +274,5 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
 
     private boolean ifNoCrash(){
         return (SHposX >= 0 && SHposX < numRows && SHposY >= 0 && SHposY < numColumns);
-    }
-
-    /**
-     * place une image de sourie dans une cellule du tableau
-     * @param positions     contien la position et le type de souris
-     */
-    private void setMousWithPos(@NonNull int[] positions) {
-        // Obtenir le conteneur à la nouvelle position et i placer l'image
-        FrameLayout frameLayout = (FrameLayout) tableLayout.findViewWithTag(positions[0] + "-" + positions[1]);
-        // Ajouter l'ImageView au conteneur
-        if (positions[2] == 0){
-            frameLayout.addView(whiteMousView);
-        } else {
-            frameLayout.addView(brownMousView);
-        }
     }
 }
