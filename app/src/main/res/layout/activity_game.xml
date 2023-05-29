@@ -10,7 +10,8 @@
     <TableLayout
         android:id="@+id/tableView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:clipChildren="false">
     </TableLayout>
 
     <TextView
@@ -20,13 +21,27 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/gameOver"
+    <FrameLayout
+        android:id="@+id/End"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent">
+        <TextView
+            android:id="@+id/gameOver"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/main_composent_space"/>
+
+        <TextView
+            android:id="@+id/scor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/main_composent_space"
+            app:layout_constraintTop_toBottomOf="@+id/gameOver"
+            android:textColor="@color/red"/>
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -18,10 +18,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.view.ViewGroup;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 
 /**
@@ -33,12 +31,13 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager sensorManager;
     private Sensor gravitySensor;
     private TextView orientationTextView;
-    private ImageView snakeHaedView;
-    private ImageView MousView;
+    private ImageView mousView;
+    ArrayList<ImageView> snakePartsView = new ArrayList<>();
     private TableLayout tableLayout;
     private TextView gameOver;
-
+    private TextView scor;
     ArrayList<int[]> mousePositionsAndType = new ArrayList<>();
+    ArrayList<int[]> snakePositionsAndType = new ArrayList<>();
 
     /**
      * à la première création du programme
@@ -62,15 +61,15 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
         tableLayout = findViewById(R.id.tableView);
         gameOver = findViewById(R.id.gameOver);
         gameOver.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30);
+        scor = findViewById(R.id.gameOver);
+        scor.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30);
 
-        // définir l'image de la tête du serpent
-        snakeHaedView = new ImageView(this);
-        snakeHaedView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-        snakeHaedView.setImageResource(R.drawable.snake_head);
+        // définir les images du repant
+        addSnakePartsView();
 
         // définir les images de souris
-        MousView = new ImageView(this);
-        MousView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        mousView = new ImageView(this);
+        mousView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
 
         // définir la tail de l'écran
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -81,8 +80,8 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
         // démarage
         newStart();
         generateGameStructure(screenHeight, screenWidth);
-
-        playGame.setMousWithPos(mousePositionsAndType.get(0), tableLayout, MousView);
+        playGame.setMousWithPos(mousePositionsAndType.get(0), tableLayout, mousView);
+        playGame.setSnakePartWithPos(snakePositionsAndType.get(0), tableLayout, snakePartsView.get(0));
     }
 
     // les variables globales ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -91,38 +90,32 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
     int numColumns = 20;
 
     // les variables des éléments délacable
-    int SHposX = 4;
-    int SHposY = 0;
-    int SHorientation = 0;
-    int WMposX = 6;
-    int WMposY = 9;
     ArrayList<int[]> limitMousPosAndType = new ArrayList<>();
 
     // variable pour jouer
     boolean isGameOver = false;
-    int cooldown = 0;
+    int cooldown = 10;
 
     // Mes fonctions |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-
     /**
      * remet les valeurs initial
      */
     private void newStart(){
-        SHposX = 4;
-        SHposY = 0;
-        SHorientation = 0;
-        WMposX = 6;
-        WMposY = 9;
-        limitMousPosAndType.add(new int[]{0, numRows}); // X min max
-        limitMousPosAndType.add(new int[]{0, numColumns}); // Y min max
+        limitMousPosAndType.clear();
+        limitMousPosAndType.add(new int[]{0, numRows-1}); // X min max
+        limitMousPosAndType.add(new int[]{0, numColumns-1}); // Y min max
         limitMousPosAndType.add(new int[]{0, 1}); // moustype min max
         mousePositionsAndType.clear();
         ArrayList<int[]> limitInitMousPosAnsType = new ArrayList<>();
-        limitInitMousPosAnsType.add(new int[]{2, 8}); // X min max
-        limitInitMousPosAnsType.add(new int[]{3, 17}); // Y min max
+        limitInitMousPosAnsType.add(new int[]{3, 6}); // X min max
+        limitInitMousPosAnsType.add(new int[]{4, 15}); // Y min max
         limitInitMousPosAnsType.add(new int[]{0, 1}); // moustype min max
-        int[] initPosition = playGame.RandomMousPosition(limitInitMousPosAnsType);
+        int[] initPosition = playGame.RandomMousPosition(limitInitMousPosAnsType, snakePositionsAndType);
         mousePositionsAndType.add(initPosition);
+        snakePositionsAndType.clear();
+        snakePositionsAndType.add(new int[]{4, 0, 0});
+        gameOver.setText("");
+        scor.setText("");
     }
 
     /**
@@ -147,16 +140,12 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
 
                 // Créer et affecter une ID unique en combinant i et j
                 frameLayout.setTag(i + "-" + j);
+                frameLayout.setClipChildren(false);
 
                 if ((i % 2 == 0 && j % 2 == 0) || (i % 2 != 0 && j % 2 != 0)) {
                     frameLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.lightgreen));
                 } else {
                     frameLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.darkgreen));
-                }
-
-                if (i == SHposX && j == SHposY) {
-                    // Ajouter l'ImageView au conteneur
-                    frameLayout.addView(snakeHaedView);
                 }
 
                 // Ajouter les cellules (frameLayout) aux lignes
@@ -185,7 +174,6 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
 
     /**
      * Regarde si les capteurs change et change en même temps les affichages
-     *
      * @param event the {@link android.hardware.SensorEvent SensorEvent}.
      */
     @Override
@@ -195,46 +183,18 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
         float fyValue = (event.values[1] * 10);
 
         // Mise à jour de l'affichage dans le TextView
-        orientationTextView.setText("x : " + fxValue + "%\ny : " + fyValue);
+        orientationTextView.setText("x : " + fxValue + "%\ny : " + fyValue +
+                "%\ncooldown : " + cooldown +
+                "\nx : " + snakePositionsAndType.get(0)[0] +
+                "\ny : " + snakePositionsAndType.get(0)[1]);
 
         int xValue = (int) fxValue;
         int yValue = (int) fyValue;
 
-        if(!isGameOver) {  //  && cooldown <= 0
-
-            // jouer
-            if (ifGo(yValue, xValue)) {
-
-                // Definir la nouvelle position posX et posY
-                go(yValue, xValue);
-
-                // Supprimer l'ImageView du conteneur parent
-                ViewGroup SHparent = (ViewGroup) snakeHaedView.getParent();
-                if (SHparent != null) {
-                    SHparent.removeView(snakeHaedView);
-                }
-
-                if (ifNoCrash()) {
-                    // Obtenir le conteneur à la nouvelle position et i placer l'image
-                    FrameLayout frameLayout = (FrameLayout) tableLayout.findViewWithTag(SHposX + "-" + SHposY);
-                    snakeHaedView.setRotation(SHorientation);
-                    frameLayout.addView(snakeHaedView);
-
-                    // vérifier si le serpent bouffe la souri
-                    ViewGroup WMparent = (ViewGroup) MousView.getParent();
-                    if (Objects.equals(SHparent.getTag(), WMparent.getTag()) && WMparent != null) {
-                        WMparent.removeView(MousView);
-                    }
-                } else {
-                    isGameOver = true;
-                    gameOver.setText("Game Over");
-                }
-            }
-
-            cooldown = 0;
+        if (cooldown < 1 && !isGameOver) {
+            play(xValue, yValue);
         }
-
-        cooldown--;
+        cooldown = (cooldown == -1) ? 5 : cooldown - 1;
     }
 
     @Override
@@ -242,37 +202,53 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
         // Ne fait rien pour le moment
     }
 
-    private boolean ifGo(int yValue, int xValue) {
-        return (yValue > 10 || yValue < -10 || xValue > 10 || xValue < -10 );
+    private void setRamdomMous() {
+
+        playGame.removeAllWithListPos(mousePositionsAndType, tableLayout);
+
+        int[] NewmousePositionsAndType;
+        NewmousePositionsAndType = playGame.RandomMousPosition(limitMousPosAndType, snakePositionsAndType);
+        mousePositionsAndType.clear();
+        mousePositionsAndType.add(NewmousePositionsAndType);
+        playGame.setMousWithPos(NewmousePositionsAndType,tableLayout,mousView);
     }
 
-    // ici je dois éxecuter ça en boucle avec un cooldown et en straide !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    private void go(int yValue, int xValue){
-        // Récupèrer les valeurs absolut
-        int absYValue = Math.abs(yValue);
-        int absXValue = Math.abs(xValue);
+    private void play(int xValue, int yValue){
+        int[] newPosition = playGame.SetNewSnakeHeadPosition(snakePositionsAndType.get(0), xValue, yValue);
+        playGame.removeAllWithListPos(snakePositionsAndType, tableLayout);
+        if (playGame.ifNotGameOver(newPosition, numRows, numColumns)){
+            ArrayList<int[]> newSnakePositionsAndType = new ArrayList<>();
+            newSnakePositionsAndType.addAll(snakePositionsAndType);
+            snakePositionsAndType.clear();
 
-        // Définir la nouvelle position posX et posY
-        if (absYValue > absXValue) {
-            if (yValue > 10 && SHorientation != 180) {
-                SHposY++;
-                SHorientation = 0;
-            } else if (yValue < -10 && SHorientation != 0) {
-                SHposY--;
-                SHorientation = 180;
+            boolean mousEated = false;
+            int matchPositions = playGame.thereMouseAtNewPosition(newSnakePositionsAndType.get(0), mousePositionsAndType);
+            if(matchPositions >= 0){
+                setRamdomMous();
+                addSnakePartsView();
+                mousEated = true;
             }
+            snakePositionsAndType.addAll(playGame.snakeGo(newSnakePositionsAndType, newPosition, mousEated));
+            playGame.setSnakeWithPos(snakePositionsAndType, tableLayout, snakePartsView);
+            cooldown = 5;
         } else {
-            if (xValue > 10 && SHorientation != 270) {
-                SHposX++;
-                SHorientation = 90;
-            } else if (xValue < -10 && SHorientation != 90) {
-                SHposX--;
-                SHorientation = 270;
-            }
+            isGameOver = true;
+            playGame.setSnakePartWithPos(new int[]{snakePositionsAndType.get(0)[0], snakePositionsAndType.get(0)[1], -1}, tableLayout, snakePartsView.get(0));
+            gameOver.setText("Game Over");
+            String score = String.valueOf(snakePositionsAndType.size());
+            scor.setText("Score : " + score);
         }
     }
 
-    private boolean ifNoCrash(){
-        return (SHposX >= 0 && SHposX < numRows && SHposY >= 0 && SHposY < numColumns);
+    private void addSnakePartsView(){
+        ImageView snakePartView;
+        // définir l'image de bout de serpent
+        snakePartView = new ImageView(this);
+        snakePartView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        // Définir l'échelle de l'image
+        float scale = 1.1f; // L'échelle souhaitée (1.1f représente une augmentation de 10%)
+        snakePartView.setScaleX(scale);
+        snakePartView.setScaleY(scale);
+        snakePartsView.add(snakePartView);
     }
 }
