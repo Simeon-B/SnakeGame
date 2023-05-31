@@ -4,6 +4,7 @@ package com.example.snakegame;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -34,7 +35,6 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
     private ImageView mousView;
     ArrayList<ImageView> snakePartsView = new ArrayList<>();
     private TableLayout tableLayout;
-    private TextView gameOver;
     private TextView scor;
     ArrayList<int[]> mousePositionsAndType = new ArrayList<>();
     ArrayList<int[]> snakePositionsAndType = new ArrayList<>();
@@ -59,9 +59,7 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
         // les éléments du jeux
         orientationTextView = findViewById(R.id.orientationTextView);
         tableLayout = findViewById(R.id.tableView);
-        gameOver = findViewById(R.id.gameOver);
-        gameOver.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30);
-        scor = findViewById(R.id.gameOver);
+        scor = findViewById(R.id.scor);
         scor.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30);
 
         // définir les images du repant
@@ -114,7 +112,6 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
         mousePositionsAndType.add(initPosition);
         snakePositionsAndType.clear();
         snakePositionsAndType.add(new int[]{4, 0, 0});
-        gameOver.setText("");
         scor.setText("");
     }
 
@@ -176,17 +173,26 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
      * Regarde si les capteurs change et change en même temps les affichages
      * @param event the {@link android.hardware.SensorEvent SensorEvent}.
      */
+    @SuppressLint("SetTextI18n")
     @Override
     public void onSensorChanged(SensorEvent event) {
         // Mise à jour des valeurs de x, y et z
         float fxValue = (event.values[0] * 10);
         float fyValue = (event.values[1] * 10);
 
+        StringBuilder LesXDuSerpent = new StringBuilder();
+        LesXDuSerpent.append("\nx");
+        StringBuilder LesYDuSerpent = new StringBuilder();
+        LesYDuSerpent.append("\nx");
+        for (int X = 0; X < snakePositionsAndType.size(); X++) {
+            LesXDuSerpent.append(" : ").append(snakePositionsAndType.get(X)[0]);
+            LesYDuSerpent.append(" : ").append(snakePositionsAndType.get(X)[1]);
+        }
+
         // Mise à jour de l'affichage dans le TextView
         orientationTextView.setText("x : " + fxValue + "%\ny : " + fyValue +
                 "%\ncooldown : " + cooldown +
-                "\nx : " + snakePositionsAndType.get(0)[0] +
-                "\ny : " + snakePositionsAndType.get(0)[1]);
+                LesXDuSerpent.toString() + LesYDuSerpent.toString());
 
         int xValue = (int) fxValue;
         int yValue = (int) fyValue;
@@ -202,53 +208,59 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
         // Ne fait rien pour le moment
     }
 
-    private void setRamdomMous() {
-
-        playGame.removeAllWithListPos(mousePositionsAndType, tableLayout);
-
-        int[] NewmousePositionsAndType;
-        NewmousePositionsAndType = playGame.RandomMousPosition(limitMousPosAndType, snakePositionsAndType);
-        mousePositionsAndType.clear();
-        mousePositionsAndType.add(NewmousePositionsAndType);
-        playGame.setMousWithPos(NewmousePositionsAndType,tableLayout,mousView);
-    }
-
+    /**
+     * enclanche un étape du jeux avec tous les règles
+     * Puis on peut répèter ceci pour tous le jeux
+     * @param xValue Valeur X du capteur gravity
+     * @param yValue Valeur Y du capteur gravity
+     */
     private void play(int xValue, int yValue){
+
+        // trouve la nouvelle position de la tête puis supprime tous le serpent
         int[] newPosition = playGame.SetNewSnakeHeadPosition(snakePositionsAndType.get(0), xValue, yValue);
         playGame.removeAllWithListPos(snakePositionsAndType, tableLayout);
-        if (playGame.ifNotGameOver(newPosition, numRows, numColumns)){
-            ArrayList<int[]> newSnakePositionsAndType = new ArrayList<>();
-            newSnakePositionsAndType.addAll(snakePositionsAndType);
-            snakePositionsAndType.clear();
+
+        // si je n'ai pa perdu
+        if (playGame.ifNotGameOver(snakePositionsAndType, newPosition, numRows, numColumns)){
+
+            ArrayList<int[]> oldSnakePositionsAndType = new ArrayList<>();
+            oldSnakePositionsAndType.addAll(snakePositionsAndType);
 
             boolean mousEated = false;
-            int matchPositions = playGame.thereMouseAtNewPosition(newSnakePositionsAndType.get(0), mousePositionsAndType);
+            int matchPositions = playGame.thereMouseAtNewPosition(snakePositionsAndType.get(0), mousePositionsAndType);
             if(matchPositions >= 0){
-                setRamdomMous();
+                playGame.setRamdomMous(mousePositionsAndType, snakePositionsAndType, limitMousPosAndType, tableLayout, mousView);
                 addSnakePartsView();
                 mousEated = true;
             }
-            snakePositionsAndType.addAll(playGame.snakeGo(newSnakePositionsAndType, newPosition, mousEated));
+
+            snakePositionsAndType.clear();
+            snakePositionsAndType.addAll(playGame.snakeGo(oldSnakePositionsAndType, newPosition, mousEated));
             playGame.setSnakeWithPos(snakePositionsAndType, tableLayout, snakePartsView);
             cooldown = 5;
         } else {
             isGameOver = true;
             playGame.setSnakePartWithPos(new int[]{snakePositionsAndType.get(0)[0], snakePositionsAndType.get(0)[1], -1}, tableLayout, snakePartsView.get(0));
-            gameOver.setText("Game Over");
-            String score = String.valueOf(snakePositionsAndType.size());
+            String score = String.valueOf(snakePositionsAndType.size() -1);
             scor.setText("Score : " + score);
         }
     }
 
+    /**
+     * Ajouter un élément au serpent
+     */
     private void addSnakePartsView(){
-        ImageView snakePartView;
         // définir l'image de bout de serpent
+        ImageView snakePartView;
         snakePartView = new ImageView(this);
         snakePartView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+
         // Définir l'échelle de l'image
         float scale = 1.1f; // L'échelle souhaitée (1.1f représente une augmentation de 10%)
         snakePartView.setScaleX(scale);
         snakePartView.setScaleY(scale);
+
+        // ajouter une image à la liste d'image pour le serpent
         snakePartsView.add(snakePartView);
     }
 }
