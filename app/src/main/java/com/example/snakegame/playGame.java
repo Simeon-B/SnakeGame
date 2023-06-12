@@ -67,24 +67,20 @@ public class  playGame extends AppCompatActivity {
     }
 
     /**
-     * affiche/palce tous les éléments du serpent selon la liste donné dans le tableau
+     * affiche/palce les 2 premier et le dernière élément du serpent selon la liste donné dans le tableau
      * @param positions liste des position des bout du serpent
      * @param tableLayout le tableau de jeux
      * @param snakePartsView la liste des View(conteneur) des images pour le serpent
      */
-    static void setSnakeStartAndEndWithPos(ArrayList<int[]> positions, TableLayout tableLayout, ArrayList<ImageView> snakePartsView ) {
+    static void setSnakeStartAndEndWithPos(ArrayList<int[]> positions, TableLayout tableLayout, ArrayList<ImageView> snakePartsView) {
         int lastIndex = positions.size()-1;
 
-        setSnakePartWithPos(positions.get(0), tableLayout, snakePartsView.get(0));
-        if (lastIndex > 0){
+        if (lastIndex > 5) {
+            setSnakeWithPos(positions, tableLayout, snakePartsView);
+        } else {
+            setSnakePartWithPos(positions.get(0), tableLayout, snakePartsView.get(0));
             setSnakePartWithPos(positions.get(1), tableLayout, snakePartsView.get(1));
-            if (lastIndex == 2){
-                setSnakePartWithPos(positions.get(lastIndex), tableLayout, snakePartsView.get(lastIndex));
-            }
-            if (lastIndex > 2){
-                setSnakePartWithPos(positions.get(lastIndex-1), tableLayout, snakePartsView.get(lastIndex-1));
-                setSnakePartWithPos(positions.get(lastIndex), tableLayout, snakePartsView.get(lastIndex));
-            }
+            setSnakePartWithPos(positions.get(lastIndex), tableLayout, snakePartsView.get(lastIndex));
         }
     }
 
@@ -131,6 +127,25 @@ public class  playGame extends AppCompatActivity {
     static void removeAllWithListPos(ArrayList<int[]> positions, TableLayout tableLayout) {
         for (int[] position : positions) {
             removeAllWithPos(position, tableLayout);
+        }
+    }
+
+    /**
+     *
+     * @param positions
+     * @param tableLayout
+     * @param growsUp
+     */
+    static void removeSnakeStartAndEndWithPos(ArrayList<int[]> positions, TableLayout tableLayout, boolean growsUp) {
+        int lastIndex = positions.size()-1;
+
+        if (lastIndex > 4 && growsUp || lastIndex > 5) {
+            removeAllWithListPos(positions, tableLayout);
+        } else {
+            removeAllWithPos(positions.get(0), tableLayout);
+            removeAllWithPos(positions.get(1), tableLayout);
+            if (!growsUp) { removeAllWithPos(positions.get(lastIndex-1), tableLayout); }
+            removeAllWithPos(positions.get(lastIndex), tableLayout);
         }
     }
 

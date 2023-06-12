@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.RelativeLayout;
@@ -45,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Désactiver l'écran de verrouillage spécifiquement pour cette activité
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // affecter l'objet à la variable aproprier
         btPlay = findViewById(R.id.main_button_play);
@@ -94,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
         numberUsersEntered = 0;
         player1 = "";
         player2 = "";
+        gamemod = "";
     }
 
     /**
@@ -133,10 +139,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void oksetGamemode(){
-        gamemod = spinGamemod.getItemAtPosition(0).toString();
+
+        gamemod = getSelectedSpinnerValue();
         txtVGamemod.setText(gamemod);
         rlSetGamemod.setVisibility(View.INVISIBLE);
         btPlay.setEnabled(true);
+    }
+
+    private String getSelectedSpinnerValue() {
+        Object selectedItem = spinGamemod.getSelectedItem();
+        if (selectedItem != null) {
+            return selectedItem.toString();
+        }
+        return "";
     }
 
     /**

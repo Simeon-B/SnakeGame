@@ -5,9 +5,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TableLayout;
@@ -38,6 +40,7 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
     private TextView scor;
     ArrayList<int[]> mousePositionsAndType = new ArrayList<>();
     ArrayList<int[]> snakePositionsAndType = new ArrayList<>();
+    private String gamemod;
 
     /**
      * à la première création du programme
@@ -49,6 +52,12 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
+
+        // Désactiver l'écran de verrouillage spécifiquement pour cette activité
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        // Récupérer l'intent qui a lancé cette activité
+        Intent intent = getIntent();
 
         // affecter l'objet à la variable aproprier |||||||||||||||||||||
 
@@ -64,6 +73,14 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
 
         // définir les images du repant
         addSnakePartsView();
+
+        // récupèrer le mode de jeux
+        // Vérifier si l'intent contient une valeur pour la clé "Gamemod"
+        if(intent.hasExtra("Gamemod")) {
+
+            // Récupérer la valeur de la variable "Gamemod"
+           gamemod = intent.getStringExtra("Gamemod");
+        }
 
         // définir les images de souris
         mousView = new ImageView(this);
@@ -91,8 +108,9 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
     ArrayList<int[]> limitMousPosAndType = new ArrayList<>();
 
     // variable pour jouer
-    boolean isGameOver = false;
-    int cooldown = 10;
+    boolean isGameOver;
+    int cooldown;
+    int cooldownLimit;
 
     // Mes fonctions |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     /**
@@ -100,19 +118,22 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
      */
     private void newStart(){
         limitMousPosAndType.clear();
-        limitMousPosAndType.add(new int[]{0, numRows-1}); // X min max
-        limitMousPosAndType.add(new int[]{0, numColumns-1}); // Y min max
+        limitMousPosAndType.add(new int[]{1, numRows-2}); // X min max
+        limitMousPosAndType.add(new int[]{1, numColumns-2}); // Y min max
         limitMousPosAndType.add(new int[]{0, 1}); // moustype min max
         mousePositionsAndType.clear();
         ArrayList<int[]> limitInitMousPosAnsType = new ArrayList<>();
-        limitInitMousPosAnsType.add(new int[]{3, 6}); // X min max
-        limitInitMousPosAnsType.add(new int[]{4, 15}); // Y min max
+        limitInitMousPosAnsType.add(new int[]{3, numRows-4}); // X min max
+        limitInitMousPosAnsType.add(new int[]{4, numColumns-4}); // Y min max
         limitInitMousPosAnsType.add(new int[]{0, 1}); // moustype min max
         int[] initPosition = playGame.RandomMousPosition(limitInitMousPosAnsType, snakePositionsAndType);
         mousePositionsAndType.add(initPosition);
         snakePositionsAndType.clear();
         snakePositionsAndType.add(new int[]{4, 0, 0});
         scor.setText("");
+        cooldownLimit = 12;
+        cooldown = cooldownLimit;
+        isGameOver = false;
     }
 
     /**
@@ -192,20 +213,50 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
         // Mise à jour de l'affichage dans le TextView
         orientationTextView.setText("x : " + fxValue + "%\ny : " + fyValue +
                 "%\ncooldown : " + cooldown +
-                LesXDuSerpent.toString() + LesYDuSerpent.toString());
+                LesXDuSerpent.toString() + LesYDuSerpent.toString() +
+                "\ngamemod : " + gamemod);
 
         int xValue = (int) fxValue;
         int yValue = (int) fyValue;
 
+        // execute le mod de jeux
+        modPlay(xValue, yValue);
+
         if (cooldown < 1 && !isGameOver) {
             play(xValue, yValue);
         }
-        cooldown = (cooldown == -1) ? 5 : cooldown - 1;
+        cooldown = (cooldown < 0) ? cooldownLimit : cooldown - 1;
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         // Ne fait rien pour le moment
+    }
+
+    private void modPlay(int xValue, int yValue) {
+        int snakeSize = snakePositionsAndType.size();
+        if (gamemod.equals("Sandbox")) {
+            cooldownLimit = 10;
+            if (Math.abs(xValue) < 10 && Math.abs(yValue) < 10) {
+                cooldown = cooldownLimit;
+            }
+        } else if (gamemod.equals("Hardcore")) {
+            cooldownLimit = 2;
+            if (snakeSize > 10) {
+                cooldownLimit = 1;
+            }
+        } else {
+            cooldownLimit = 5;
+            if (snakeSize > 3 ) {
+                cooldownLimit = 4;
+            } else if (snakeSize > 6 ) {
+                cooldownLimit = 3;
+            } else if (snakeSize > 10 ) {
+                cooldownLimit = 2;
+            } else if (snakeSize > 15 ) {
+                cooldownLimit = 1;
+            }
+        }
     }
 
     /**
@@ -223,9 +274,11 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
         // si je n'ai pa perdu
         if (playGame.ifNotGameOver(snakePositionsAndType, newPosition, numRows, numColumns)){
 
+            // récupèrer les position actuel/encient
             ArrayList<int[]> oldSnakePositionsAndType = new ArrayList<>();
             oldSnakePositionsAndType.addAll(snakePositionsAndType);
 
+            // gèrer la souris
             boolean mousEated = false;
             int matchPositions = playGame.thereMouseAtNewPosition(snakePositionsAndType.get(0), mousePositionsAndType);
             if(matchPositions >= 0){
@@ -234,10 +287,15 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
                 mousEated = true;
             }
 
+            // playGame.removeSnakeStartAndEndWithPos(snakePositionsAndType, tableLayout, mousEated); // tentative d'amélioré le chragement du serpent
+
+            // effacer puis replacer le serpent
             snakePositionsAndType.clear();
             snakePositionsAndType.addAll(playGame.snakeGo(oldSnakePositionsAndType, newPosition, mousEated));
             playGame.setSnakeWithPos(snakePositionsAndType, tableLayout, snakePartsView);
-            cooldown = 5;
+
+            // playGame.setSnakeStartAndEndWithPos(snakePositionsAndType, tableLayout, snakePartsView); // tentative d'amélioré le chragement du serpent
+            cooldown = cooldownLimit;
         } else {
             isGameOver = true;
             playGame.setSnakePartWithPos(new int[]{snakePositionsAndType.get(0)[0], snakePositionsAndType.get(0)[1], -1}, tableLayout, snakePartsView.get(0));
