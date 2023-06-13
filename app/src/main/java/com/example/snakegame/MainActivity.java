@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private Spinner spinGamemod;
     private TextView txtVGamemod;
     private Button btReset;
+    private Resources resources;
 
     /**
      * à la première création du programme
@@ -71,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
         txtVGamemod = findViewById(R.id.main_gamemod);
         btReset = findViewById(R.id.main_button_reset);
+        resources = getResources();
 
         newStart();
     }
@@ -87,19 +90,20 @@ public class MainActivity extends AppCompatActivity {
      * remet les valeurs initial
      */
     private void newStart(){
+        String[] gamemodeOptions = resources.getStringArray(R.array.gamemode_options);
         btAddPlayer.setEnabled(false);
         btSetGamemod.setEnabled(true);
-        btPlay.setEnabled(false);
+        btPlay.setEnabled(true);
         btReset.setEnabled(false);
         rlAddPlayer.setVisibility(View.INVISIBLE);
         rlSetGamemod.setVisibility(View.INVISIBLE);
         txtVJoueur1.setText("");
         txtVJoueur2.setText("");
-        txtVGamemod.setText("");
+        txtVGamemod.setText(gamemodeOptions[1]);
         numberUsersEntered = 0;
         player1 = "";
         player2 = "";
-        gamemod = "";
+        gamemod = gamemodeOptions[1];
     }
 
     /**
@@ -139,7 +143,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void oksetGamemode(){
-
         gamemod = getSelectedSpinnerValue();
         txtVGamemod.setText(gamemod);
         rlSetGamemod.setVisibility(View.INVISIBLE);

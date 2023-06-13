@@ -116,6 +116,8 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/main_composent_space"
         android:background="@color/colorBackGround"
+        android:textColor="@color/black"
+        android:shadowColor="@color/black"
         android:gravity="center"
         android:orientation="horizontal"
         android:padding="@dimen/main_padding_size"

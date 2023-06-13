@@ -21,6 +21,5 @@
     <!-- Ecran de jeu -->
     <string name="game_title">Snake game</string>
     <string name="game_replay">Replay</string>
-    <string name="game_replay_stop">STOP</string>
     <string name="game_menu">Menu</string>
 </resources>
