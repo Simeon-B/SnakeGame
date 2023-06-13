@@ -131,25 +131,6 @@ public class  playGame extends AppCompatActivity {
     }
 
     /**
-     *
-     * @param positions
-     * @param tableLayout
-     * @param growsUp
-     */
-    static void removeSnakeStartAndEndWithPos(ArrayList<int[]> positions, TableLayout tableLayout, boolean growsUp) {
-        int lastIndex = positions.size()-1;
-
-        if (lastIndex > 4 && growsUp || lastIndex > 5) {
-            removeAllWithListPos(positions, tableLayout);
-        } else {
-            removeAllWithPos(positions.get(0), tableLayout);
-            removeAllWithPos(positions.get(1), tableLayout);
-            if (!growsUp) { removeAllWithPos(positions.get(lastIndex-1), tableLayout); }
-            removeAllWithPos(positions.get(lastIndex), tableLayout);
-        }
-    }
-
-    /**
      * calcule la nouvelle position de la tête selon les capteurs sans fair de retour sur lui même
      * @param oldPosition l'encienne/actuel position de la tête du serpent
      * @param xGravity la valeur X du capeur Gravity
@@ -168,7 +149,7 @@ public class  playGame extends AppCompatActivity {
 
         boolean continuSame = false;
 
-        // Définir la nouvelle position posX et posY
+        // Définir la nouvelle position posX et posY de la tête du serpent
         if (absXGravity > 10 || absYGravity > 10){
             if (absXGravity > absYGravity) {
                 if (xGravity > 10 && direction != 2) {
@@ -218,13 +199,17 @@ public class  playGame extends AppCompatActivity {
      * @return un int avec la souris toucher, si il n'y a pas eu de colision, je retourne -1
      */
     static int thereMouseAtNewPosition(@NonNull int[] newPosition, ArrayList<int[]> mousPositions) {
+
         int index = 0;
+
+        // recherche de colision
         for (int[] position : mousPositions) {
             if (position[0] == newPosition[0] && position[1] == newPosition[1]) {
                 return index;  // Un élément égal à newPosition a été trouvé
             }
             index++;
         }
+
         return -1;  // Aucun élément égal à newPosition n'a été trouvé
     }
 
@@ -340,8 +325,11 @@ public class  playGame extends AppCompatActivity {
      * @return Si on peut continuer de jouer ou pas
      */
     static boolean ifNotGameOver(ArrayList<int[]> snakePos, int[] SnakeHeadPos, int xMax, int yMax){
+
+        // vérifie si le serpent sort du jeu
         boolean NotGameOver = SnakeHeadPos[0] >= 0 && SnakeHeadPos[0] < xMax && SnakeHeadPos[1] >= 0 && SnakeHeadPos[1] < yMax;
 
+        // vérifie si il se touche lui même
         for (int[] part : snakePos) {
             if (part[0] == SnakeHeadPos[0] && part[1] == SnakeHeadPos[1]){
                 NotGameOver = false;
@@ -353,7 +341,7 @@ public class  playGame extends AppCompatActivity {
     }
 
     /**
-     * Remplace une nouvelle souris
+     * Place une nouvelle souris
      * @param mousePos toute les position des souris
      * @param snakePos toutes les positions de tous les bout de serpent
      * @param mouslimits Les limitations pour le générateur aléatoir, pour la nouvlelle position de la souris
@@ -377,14 +365,18 @@ public class  playGame extends AppCompatActivity {
      * @return une posistion avec un type de souris {X Y Type}
      */
     static int[] RandomMousPosition(ArrayList<int[]> limits, ArrayList<int[]> snake) {
+
         boolean ok;
         int posX;
         int posY;
+
         do {
             ok = true;  // Initialiser ok à true au début de chaque itération
             posX = RandomInt(limits.get(0)[0], limits.get(0)[1]);
             posY = RandomInt(limits.get(1)[0], limits.get(1)[1]);
+
             for (int[] part : snake) {
+
                 if ((part[0] == posX || part[0]-1 == posX || part[0]+1 == posX) && (part[1] == posY || part[1]-1 == posY || part[1]+1 == posY)){
                     ok = false;  // Si une correspondance est trouvée, ok est mis à false
                     break;  // Sortir de la boucle for
@@ -405,7 +397,9 @@ public class  playGame extends AppCompatActivity {
      * @return valeur généré
      */
     private static int RandomInt(int min, int max) {
+
         Random random = new Random();
+
         return random.nextInt(max - min + 1) + min;
     }
 }

@@ -270,6 +270,7 @@ public class gameActivity extends AppCompatActivity implements SensorEventListen
 
         int snakeSize = snakePositionsAndType.size();
 
+        // appliquer le mode de jeux
         if (gamemod.equals("Sandbox")) {
 
             cooldownLimit = 6;
